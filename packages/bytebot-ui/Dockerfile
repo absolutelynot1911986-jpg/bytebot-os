@@ -1,29 +1,10 @@
-# Base image
-FROM node:20-alpine
-
-# Declare build arguments
-ARG BYTEBOT_AGENT_BASE_URL
-ARG BYTEBOT_DESKTOP_VNC_URL
-
-# Set environment variables for the build process
-ENV BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL}
-ENV BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL}
-
-# Create app directory
-WORKDIR /app
-
-# Copy app source
-COPY ./shared ./shared
-COPY ./bytebot-ui/ ./bytebot-ui
-
-WORKDIR /app/bytebot-ui
-
-# Install dependencies
-RUN npm install
-
-RUN npm run build
-
-# Run the application
-CMD ["npm", "run", "start"] 
-
-
+FROM node:lts-alpine
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production --silent && mv node_modules ../
+COPY . .
+EXPOSE 3000
+RUN chown -R node /usr/src/app
+USER node
+CMD ["npm", "start"]
